@@ -476,7 +476,7 @@ erDiagram
     SHIPS ||--o{ SHIP_AMENITIES : has
     AMENITIES ||--o{ SHIP_AMENITIES : offered_on
     PORTS ||--o{ CRUISES : departs_from
-    DESTINATIONS ||--o{ CRUISES : travels_to
+    PORTS ||--o{ CRUISES : arrives_at
     CRUISES ||--o{ CRUISE_CABINS : has
     CABIN_TYPES ||--o{ CRUISE_CABINS : defines
     CRUISES ||--o{ RESERVATIONS : booked_for
@@ -522,16 +522,10 @@ erDiagram
         varchar port_code UK
         decimal latitude
         decimal longitude
-        boolean is_active
-    }
-
-    DESTINATIONS {
-        int destination_id PK
-        varchar destination_name UK
         varchar region
-        varchar country
-        varchar description
+        text description
         varchar image_url
+        boolean is_active
     }
 
     CABIN_TYPES {
@@ -547,7 +541,7 @@ erDiagram
         bigint cruise_id PK
         bigint ship_id FK
         int departure_port_id FK
-        int destination_id FK
+        int arrival_port_id FK
         date departure_date
         date return_date
         int duration_days
@@ -687,7 +681,7 @@ erDiagram
 ---
 
 ### 4. PORTS Table
-**Purpose:** Stores departure port information
+**Purpose:** Stores port information for both departures and arrivals
 
 | Column Name | Data Type     | Constraints                 | Description                    |
 |-------------|---------------|----------------------------|--------------------------------|
@@ -698,6 +692,9 @@ erDiagram
 | port_code   | VARCHAR(10)   | UNIQUE, NOT NULL           | Port code (e.g., MIA, NYC)     |
 | latitude    | DECIMAL(10,8) | NULL                       | Geographic latitude            |
 | longitude   | DECIMAL(11,8) | NULL                       | Geographic longitude           |
+| region      | VARCHAR(100)  | NULL                       | Region (Caribbean, Mediterranean, etc.) |
+| description | TEXT          | NULL                       | Port/destination description   |
+| image_url   | VARCHAR(500)  | NULL                       | Port/destination image URL     |
 | is_active   | BOOLEAN       | DEFAULT TRUE               | Port active status             |
 
 **Indexes:**
@@ -705,29 +702,11 @@ erDiagram
 - UNIQUE INDEX: `port_name`
 - UNIQUE INDEX: `port_code`
 - INDEX: `country`, `is_active`
-
----
-
-### 5. DESTINATIONS Table
-**Purpose:** Stores cruise destinations
-
-| Column Name        | Data Type    | Constraints                 | Description                    |
-|--------------------|--------------|----------------------------|--------------------------------|
-| destination_id     | INT          | PRIMARY KEY, AUTO_INCREMENT| Unique destination identifier  |
-| destination_name   | VARCHAR(100) | UNIQUE, NOT NULL           | Destination name               |
-| region             | VARCHAR(100) | NULL                       | Region (Caribbean, Mediterranean, etc.) |
-| country            | VARCHAR(100) | NULL                       | Country                        |
-| description        | TEXT         | NULL                       | Destination description        |
-| image_url          | VARCHAR(500) | NULL                       | Destination image URL          |
-
-**Indexes:**
-- PRIMARY KEY: `destination_id`
-- UNIQUE INDEX: `destination_name`
 - INDEX: `region`
 
 ---
 
-### 6. CABIN_TYPES Table
+### 5. CABIN_TYPES Table
 **Purpose:** Defines different cabin types and their characteristics
 
 | Column Name           | Data Type     | Constraints                 | Description                    |
@@ -752,7 +731,7 @@ erDiagram
 
 ---
 
-### 7. CRUISES Table
+### 6. CRUISES Table
 **Purpose:** Stores cruise itineraries and schedules
 
 | Column Name        | Data Type     | Constraints                       | Description                      |
@@ -760,7 +739,7 @@ erDiagram
 | cruise_id          | BIGINT        | PRIMARY KEY, AUTO_INCREMENT       | Unique cruise identifier         |
 | ship_id            | BIGINT        | FOREIGN KEY (SHIPS.ship_id)       | Ship operating this cruise       |
 | departure_port_id  | INT           | FOREIGN KEY (PORTS.port_id)       | Departure port                   |
-| destination_id     | INT           | FOREIGN KEY (DESTINATIONS.dest.id)| Primary destination              |
+| arrival_port_id    | INT           | FOREIGN KEY (PORTS.port_id)       | Final arrival/destination port   |
 | departure_date     | DATE          | NOT NULL                          | Cruise departure date            |
 | return_date        | DATE          | NOT NULL                          | Cruise return date               |
 | duration_days      | INT           | NOT NULL                          | Cruise duration in days          |
@@ -776,13 +755,13 @@ erDiagram
 - PRIMARY KEY: `cruise_id`
 - FOREIGN KEY: `ship_id` REFERENCES `SHIPS(ship_id)`
 - FOREIGN KEY: `departure_port_id` REFERENCES `PORTS(port_id)`
-- FOREIGN KEY: `destination_id` REFERENCES `DESTINATIONS(destination_id)`
+- FOREIGN KEY: `arrival_port_id` REFERENCES `PORTS(port_id)`
 - INDEX: `departure_date`, `return_date`
 - INDEX: `status`, `available_cabins`
 
 ---
 
-### 8. CRUISE_CABINS Table
+### 7. CRUISE_CABINS Table
 **Purpose:** Stores specific cabin information for each cruise
 
 | Column Name      | Data Type     | Constraints                         | Description                      |
@@ -805,7 +784,7 @@ erDiagram
 
 ---
 
-### 9. ITINERARY_STOPS Table
+### 8. ITINERARY_STOPS Table
 **Purpose:** Stores port stops during the cruise
 
 | Column Name    | Data Type    | Constraints                     | Description                      |
@@ -828,7 +807,7 @@ erDiagram
 
 ---
 
-### 10. RESERVATIONS Table
+### 9. RESERVATIONS Table
 **Purpose:** Stores customer cruise reservations/bookings
 
 | Column Name        | Data Type     | Constraints                         | Description                      |
@@ -861,7 +840,7 @@ erDiagram
 
 ---
 
-### 11. PASSENGERS Table
+### 10. PASSENGERS Table
 **Purpose:** Stores individual passenger information for each reservation
 
 | Column Name         | Data Type    | Constraints                           | Description                      |
@@ -898,8 +877,8 @@ sequenceDiagram
 
     Customer->>Frontend: Access Cruise Reservation Page
     Frontend->>Backend: GET /api/cruises/search
-    Note over Backend: Query parameters: <br/>departure_date, return_date,<br/>departure_port, destination
-    Backend->>Database: SELECT FROM CRUISES<br/>JOIN SHIPS, PORTS, DESTINATIONS
+    Note over Backend: Query parameters: <br/>departure_date, return_date,<br/>departure_port, arrival_port
+    Backend->>Database: SELECT FROM CRUISES<br/>JOIN SHIPS, PORTS
     Database-->>Backend: Available cruises with details
     Backend->>Database: SELECT ship amenities
     Database-->>Backend: Amenities list
@@ -1030,43 +1009,28 @@ CREATE TABLE ports (
     port_code VARCHAR(10) NOT NULL UNIQUE,
     latitude DECIMAL(10,8),
     longitude DECIMAL(11,8),
+    region VARCHAR(100),
+    description TEXT,
+    image_url VARCHAR(500),
     is_active BOOLEAN DEFAULT TRUE,
     INDEX idx_port_name (port_name),
     INDEX idx_port_code (port_code),
-    INDEX idx_country_active (country, is_active)
-);
-
--- Insert sample ports
-INSERT INTO ports (port_name, city, country, port_code, latitude, longitude) VALUES
-('Port of Miami', 'Miami', 'USA', 'MIA', 25.7743, -80.1937),
-('Port Canaveral', 'Cape Canaveral', 'USA', 'PCV', 28.4091, -80.6098),
-('Port Everglades', 'Fort Lauderdale', 'USA', 'FLL', 26.0922, -80.1166),
-('Port of Barcelona', 'Barcelona', 'Spain', 'BCN', 41.3493, 2.1675),
-('Port of Southampton', 'Southampton', 'UK', 'SOU', 50.8998, -1.4044),
-('Port of Singapore', 'Singapore', 'Singapore', 'SIN', 1.2644, 103.8367);
-```
-
-### Create DESTINATIONS Table
-```sql
-CREATE TABLE destinations (
-    destination_id INT AUTO_INCREMENT PRIMARY KEY,
-    destination_name VARCHAR(100) NOT NULL UNIQUE,
-    region VARCHAR(100),
-    country VARCHAR(100),
-    description TEXT,
-    image_url VARCHAR(500),
-    INDEX idx_destination_name (destination_name),
+    INDEX idx_country_active (country, is_active),
     INDEX idx_region (region)
 );
 
--- Insert sample destinations
-INSERT INTO destinations (destination_name, region, country, description) VALUES
-('Caribbean Islands', 'Caribbean', 'Multiple', 'Tropical paradise with beautiful beaches'),
-('Mediterranean Coast', 'Mediterranean', 'Multiple', 'Historic cities and stunning coastline'),
-('Alaska Glaciers', 'Alaska', 'USA', 'Breathtaking glaciers and wildlife'),
-('Norwegian Fjords', 'Northern Europe', 'Norway', 'Majestic fjords and scenic beauty'),
-('Greek Islands', 'Mediterranean', 'Greece', 'Ancient history and island hopping'),
-('Southeast Asia', 'Asia Pacific', 'Multiple', 'Exotic cultures and landscapes');
+-- Insert sample ports with destination information
+INSERT INTO ports (port_name, city, country, port_code, latitude, longitude, region, description, image_url) VALUES
+('Port of Miami', 'Miami', 'USA', 'MIA', 25.7743, -80.1937, 'Caribbean', 'Gateway to Caribbean cruises with tropical beaches', NULL),
+('Port Canaveral', 'Cape Canaveral', 'USA', 'PCV', 28.4091, -80.6098, 'Caribbean', 'Close to Orlando theme parks and Caribbean destinations', NULL),
+('Port Everglades', 'Fort Lauderdale', 'USA', 'FLL', 26.0922, -80.1166, 'Caribbean', 'Major cruise port serving Caribbean routes', NULL),
+('Port of Barcelona', 'Barcelona', 'Spain', 'BCN', 41.3493, 2.1675, 'Mediterranean', 'Historic Mediterranean port with stunning architecture', NULL),
+('Port of Southampton', 'Southampton', 'UK', 'SOU', 50.8998, -1.4044, 'Northern Europe', 'Gateway to Norwegian Fjords and Northern Europe', NULL),
+('Port of Singapore', 'Singapore', 'Singapore', 'SIN', 1.2644, 103.8367, 'Southeast Asia', 'Modern Asian hub for Southeast Asia cruises', NULL),
+('Nassau', 'Nassau', 'Bahamas', 'NAS', 25.0443, -77.3504, 'Caribbean', 'Beautiful Bahamian islands paradise', NULL),
+('Cozumel', 'Cozumel', 'Mexico', 'CZM', 20.5083, -86.9458, 'Caribbean', 'Mexican Caribbean island with coral reefs', NULL),
+('Juneau', 'Juneau', 'USA', 'JNU', 58.3019, -134.4197, 'Alaska', 'Alaska capital with breathtaking glaciers', NULL),
+('Venice', 'Venice', 'Italy', 'VCE', 45.4408, 12.3155, 'Mediterranean', 'Historic Italian city on canals', NULL);
 ```
 
 ### Create CABIN_TYPES Table
@@ -1096,7 +1060,7 @@ CREATE TABLE cruises (
     cruise_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     ship_id BIGINT NOT NULL,
     departure_port_id INT NOT NULL,
-    destination_id INT NOT NULL,
+    arrival_port_id INT NOT NULL,
     departure_date DATE NOT NULL,
     return_date DATE NOT NULL,
     duration_days INT NOT NULL,
@@ -1109,7 +1073,7 @@ CREATE TABLE cruises (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (ship_id) REFERENCES ships(ship_id),
     FOREIGN KEY (departure_port_id) REFERENCES ports(port_id),
-    FOREIGN KEY (destination_id) REFERENCES destinations(destination_id),
+    FOREIGN KEY (arrival_port_id) REFERENCES ports(port_id),
     INDEX idx_departure_date (departure_date),
     INDEX idx_return_date (return_date),
     INDEX idx_status_availability (status, available_cabins),
@@ -1255,15 +1219,16 @@ SELECT
     s.ship_name,
     s.ship_image_url,
     s.ship_logo_url,
-    p.port_name AS departure_port,
-    p.city AS departure_city,
-    d.destination_name,
-    d.region,
+    p_dep.port_name AS departure_port,
+    p_dep.city AS departure_city,
+    p_arr.port_name AS arrival_port,
+    p_arr.city AS arrival_city,
+    p_arr.region AS destination_region,
     c.highlights
 FROM cruises c
 JOIN ships s ON c.ship_id = s.ship_id
-JOIN ports p ON c.departure_port_id = p.port_id
-JOIN destinations d ON c.destination_id = d.destination_id
+JOIN ports p_dep ON c.departure_port_id = p_dep.port_id
+JOIN ports p_arr ON c.arrival_port_id = p_arr.port_id
 WHERE c.departure_date >= CURDATE()
   AND c.status = 'SCHEDULED'
   AND c.available_cabins > 0
@@ -1370,15 +1335,16 @@ SELECT
     c.departure_date,
     c.return_date,
     s.ship_name,
-    p.port_name AS departure_port,
-    d.destination_name,
+    p_dep.port_name AS departure_port,
+    p_arr.port_name AS arrival_port,
+    p_arr.region AS destination_region,
     ct.type_name AS cabin_type,
     cc.cabin_number
 FROM reservations r
 JOIN cruises c ON r.cruise_id = c.cruise_id
 JOIN ships s ON c.ship_id = s.ship_id
-JOIN ports p ON c.departure_port_id = p.port_id
-JOIN destinations d ON c.destination_id = d.destination_id
+JOIN ports p_dep ON c.departure_port_id = p_dep.port_id
+JOIN ports p_arr ON c.arrival_port_id = p_arr.port_id
 JOIN cruise_cabins cc ON r.cruise_cabin_id = cc.cruise_cabin_id
 JOIN cabin_types ct ON cc.cabin_type_id = ct.cabin_type_id
 WHERE r.user_id = ?
@@ -1588,7 +1554,8 @@ SELECT
     s.ship_name,
     c.departure_date,
     c.return_date,
-    d.destination_name,
+    p_arr.port_name AS arrival_port,
+    p_arr.region AS destination_region,
     r.total_price,
     pt.payment_method,
     pt.gateway_transaction_id,
@@ -1596,7 +1563,7 @@ SELECT
 FROM reservations r
 JOIN cruises c ON r.cruise_id = c.cruise_id
 JOIN ships s ON c.ship_id = s.ship_id
-JOIN destinations d ON c.destination_id = d.destination_id
+JOIN ports p_arr ON c.arrival_port_id = p_arr.port_id
 JOIN payment_transactions pt ON pt.reservation_id = r.reservation_id
 WHERE r.reservation_id = ?
   AND pt.status = 'COMPLETED';
