@@ -37,11 +37,12 @@
 
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Cruise <span class="text-danger">*</span></label>
-                <select class="form-select" name="cruise.cruiseId" required>
+                <select class="form-select" name="cruise.cruiseId" id="cruiseSelect" required>
                   <option value="">-- Select Cruise --</option>
                   <option th:each="c : ${cruises}"
                           th:value="${c.cruiseId}"
                           th:text="${c.cruiseName + ' (' + c.departureDate + ')'}"
+                          th:attr="data-base-price=${c.basePrice}"
                           th:selected="${booking.cruise != null and booking.cruise.cruiseId == c.cruiseId}">
                   </option>
                 </select>
@@ -59,15 +60,9 @@
                 </select>
               </div>
 
-              <div class="col-md-3">
+              <div class="col-md-6">
                 <label class="form-label fw-semibold">Booking Date <span class="text-danger">*</span></label>
                 <input type="date" class="form-control" th:field="*{bookingDate}" required/>
-              </div>
-
-              <div class="col-md-3">
-                <label class="form-label fw-semibold">Passengers <span class="text-danger">*</span></label>
-                <input type="number" class="form-control" th:field="*{numberOfPassengers}"
-                       min="1" required/>
               </div>
 
               <div class="col-md-4">
@@ -75,17 +70,9 @@
                 <div class="input-group">
                   <span class="input-group-text">$</span>
                   <input type="number" step="0.01" min="0" class="form-control"
-                         th:field="*{totalPrice}" required/>
+                         th:field="*{totalPrice}" readonly/>
                 </div>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label fw-semibold">Status</label>
-                <select class="form-select" th:field="*{bookingStatus}">
-                  <option value="PENDING">Pending</option>
-                  <option value="CONFIRMED">Confirmed</option>
-                  <option value="CANCELLED">Cancelled</option>
-                </select>
+                <small class="text-muted">Calculated as: Base Price × Number of Passengers</small>
               </div>
 
               <div class="col-12">
@@ -104,9 +91,93 @@
           </form>
         </div>
       </div>
+
+      <!-- Passengers Section (only shown when editing an existing booking) -->
+      <div class="card shadow-sm mt-4" style="max-width:780px;" th:if="${booking.bookingId != null}">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi bi-people me-2"></i>Passengers
+          </h5>
+          <a th:href="@{/passengers/booking/{id}/new(id=${booking.bookingId})}" 
+             class="btn btn-sm btn-success">
+            <i class="bi bi-plus-circle me-1"></i>Add Passenger
+          </a>
+        </div>
+        <div class="card-body">
+          <div th:if="${booking.passengers != null and !booking.passengers.isEmpty()}">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Date of Birth</th>
+                    <th>Gender</th>
+                    <th>Nationality</th>
+                    <th>Passport</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="passenger : ${booking.passengers}">
+                    <td th:text="${passenger.firstName + ' ' + passenger.lastName}">John Doe</td>
+                    <td th:text="${passenger.dateOfBirth}">1990-01-01</td>
+                    <td th:text="${passenger.gender ?: '-'}">Male</td>
+                    <td th:text="${passenger.nationality ?: '-'}">American</td>
+                    <td th:text="${passenger.passportNumber ?: '-'}">AB123456</td>
+                    <td class="text-center">
+                      <div class="btn-group btn-group-sm">
+                        <a th:href="@{/passengers/{id}/edit(id=${passenger.passengerId})}" 
+                           class="btn btn-outline-primary" title="Edit">
+                          <i class="bi bi-pencil"></i>
+                        </a>
+                        <a th:href="@{/passengers/{id}/delete(id=${passenger.passengerId})}" 
+                           class="btn btn-outline-danger" title="Delete"
+                           onclick="return confirm('Are you sure you want to remove this passenger?');">
+                          <i class="bi bi-trash"></i>
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-info mb-0">
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>Total Passengers:</strong> 
+              <span th:text="${booking.passengers.size()}">0</span>
+            </div>
+          </div>
+          <div th:if="${booking.passengers == null or booking.passengers.isEmpty()}" 
+               class="text-center text-muted py-4">
+            <i class="bi bi-person-x fs-1 d-block mb-2"></i>
+            <p class="mb-0">No passengers added yet. Click "Add Passenger" to add travelers.</p>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 </div>
 <div th:replace="~{fragments/layout :: scripts}"></div>
+
+<script>
+  // Update total price when cruise selection changes
+  document.addEventListener('DOMContentLoaded', function() {
+    const cruiseSelect = document.getElementById('cruiseSelect');
+    const totalPriceInput = document.querySelector('input[name="totalPrice"]');
+    
+    if (cruiseSelect && totalPriceInput) {
+      cruiseSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const basePrice = selectedOption.getAttribute('data-base-price');
+        
+        if (basePrice) {
+          totalPriceInput.value = parseFloat(basePrice).toFixed(2);
+        } else {
+          totalPriceInput.value = '';
+        }
+      });
+    }
+  });
+</script>
 </body>
 </html>

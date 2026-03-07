@@ -4,6 +4,7 @@ import com.cruise.booking.entity.Booking;
 import com.cruise.booking.service.BookingService;
 import com.cruise.booking.service.CruiseCabinService;
 import com.cruise.booking.service.CruiseService;
+import com.cruise.booking.service.PassengerService;
 import com.cruise.booking.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,13 +19,16 @@ public class BookingController {
     private final UserService userService;
     private final CruiseService cruiseService;
     private final CruiseCabinService cruiseCabinService;
+    private final PassengerService passengerService;
 
     public BookingController(BookingService bookingService, UserService userService,
-                                CruiseService cruiseService, CruiseCabinService cruiseCabinService) {
+                                CruiseService cruiseService, CruiseCabinService cruiseCabinService,
+                                PassengerService passengerService) {
         this.bookingService = bookingService;
         this.userService = userService;
         this.cruiseService = cruiseService;
         this.cruiseCabinService = cruiseCabinService;
+        this.passengerService = passengerService;
     }
 
     @GetMapping
@@ -45,6 +49,9 @@ public class BookingController {
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes ra) {
         return bookingService.getBookingById(id).map(booking -> {
+            // Load passengers for this booking
+            booking.setPassengers(passengerService.getPassengersByBookingId(id));
+            
             model.addAttribute("booking", booking);
             model.addAttribute("users", userService.getAllUsers());
             model.addAttribute("cruises", cruiseService.getAvailableCruises());
@@ -59,13 +66,45 @@ public class BookingController {
     @PostMapping("/save")
     public String save(@ModelAttribute Booking booking, RedirectAttributes ra) {
         if (booking.getBookingId() != null) {
+            // Fetch full cruise object from database
+            if (booking.getCruise() != null && booking.getCruise().getCruiseId() != null) {
+                var cruise = cruiseService.getCruiseById(booking.getCruise().getCruiseId()).orElse(null);
+                booking.setCruise(cruise);
+                
+                // Recalculate total price based on cruise base price and number of passengers
+                if (cruise != null && booking.getNumberOfPassengers() != null) {
+                    booking.setTotalPrice(
+                        cruise.getBasePrice()
+                            .multiply(java.math.BigDecimal.valueOf(booking.getNumberOfPassengers()))
+                    );
+                }
+            }
             bookingService.updateBooking(booking.getBookingId(), booking);
             ra.addFlashAttribute("success", "Booking updated successfully.");
+            return "redirect:/bookings/" + booking.getBookingId() + "/edit";
         } else {
-            bookingService.saveBooking(booking);
-            ra.addFlashAttribute("success", "Booking created successfully.");
+            // Set default status to PENDING for new bookings
+            booking.setBookingStatus("PENDING");
+            // Set initial number of passengers to 0
+            booking.setNumberOfPassengers(0);
+            
+            // Fetch full cruise object from database and set initial total price to cruise base price
+            if (booking.getCruise() != null && booking.getCruise().getCruiseId() != null) {
+                var cruise = cruiseService.getCruiseById(booking.getCruise().getCruiseId()).orElse(null);
+                booking.setCruise(cruise);
+                if (cruise != null && cruise.getBasePrice() != null) {
+                    booking.setTotalPrice(cruise.getBasePrice());
+                } else {
+                    booking.setTotalPrice(java.math.BigDecimal.ZERO);
+                }
+            } else {
+                booking.setTotalPrice(java.math.BigDecimal.ZERO);
+            }
+            
+            Booking savedBooking = bookingService.saveBooking(booking);
+            ra.addFlashAttribute("success", "Booking created successfully. Now add passengers.");
+            return "redirect:/bookings/" + savedBooking.getBookingId() + "/edit";
         }
-        return "redirect:/bookings";
     }
 
     @GetMapping("/{id}/cancel")
