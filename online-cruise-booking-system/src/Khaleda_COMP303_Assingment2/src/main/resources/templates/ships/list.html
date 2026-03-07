@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Ships')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2 sidebar p-0">
+      <div th:replace="~{fragments/layout :: sidebar('ships')}"></div>
+    </div>
+    <main class="col-md-10 p-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-semibold mb-0"><i class="bi bi-ship me-2 text-primary"></i>Ships</h2>
+        <a th:href="@{/ships/new}" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-1"></i>New Ship
+        </a>
+      </div>
+
+      <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Ship Name</th>
+                  <th>Type</th>
+                  <th>Capacity</th>
+                  <th>Year Built</th>
+                  <th>Operator</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="s : ${ships}">
+                  <td th:text="${s.shipId}"></td>
+                  <td class="fw-semibold" th:text="${s.shipName}"></td>
+                  <td th:text="${s.shipType}"></td>
+                  <td th:text="${s.capacity}"></td>
+                  <td th:text="${s.yearBuilt}"></td>
+                  <td th:text="${s.operator}"></td>
+                  <td class="text-nowrap">
+                    <a th:href="@{/ships/{id}/edit(id=${s.shipId})}"
+                       class="btn btn-sm btn-outline-warning me-1" title="Edit">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <a th:href="@{/ships/{id}/delete(id=${s.shipId})}"
+                       class="btn btn-sm btn-outline-danger" title="Delete"
+                       onclick="return confirm('Delete this ship?')">
+                      <i class="bi bi-trash"></i>
+                    </a>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(ships)}">
+                  <td colspan="7" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>No ships found.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

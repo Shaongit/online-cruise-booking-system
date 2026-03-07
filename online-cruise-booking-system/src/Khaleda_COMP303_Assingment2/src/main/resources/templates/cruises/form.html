@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Cruise Form')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2 sidebar p-0">
+      <div th:replace="~{fragments/layout :: sidebar('cruises')}"></div>
+    </div>
+    <main class="col-md-10 p-4">
+      <div class="d-flex align-items-center mb-4">
+        <a th:href="@{/cruises}" class="btn btn-outline-secondary me-3">
+          <i class="bi bi-arrow-left"></i>
+        </a>
+        <h2 class="fw-semibold mb-0"
+            th:text="${cruise.cruiseId != null} ? 'Edit Cruise' : 'New Cruise'">Cruise</h2>
+      </div>
+
+      <div class="card shadow-sm" style="max-width:860px;">
+        <div class="card-body">
+          <form th:action="@{/cruises/save}" th:object="${cruise}" method="post">
+            <input type="hidden" th:field="*{cruiseId}"/>
+            <div class="row g-3">
+
+              <div class="col-md-8">
+                <label class="form-label fw-semibold">Cruise Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" th:field="*{cruiseName}" required/>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Status</label>
+                <select class="form-select" th:field="*{status}">
+                  <option value="AVAILABLE">Available</option>
+                  <option value="FULLY_BOOKED">Fully Booked</option>
+                  <option value="CANCELLED">Cancelled</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Ship <span class="text-danger">*</span></label>
+                <select class="form-select" name="ship.shipId" required>
+                  <option value="">-- Select Ship --</option>
+                  <option th:each="s : ${ships}"
+                          th:value="${s.shipId}"
+                          th:text="${s.shipName}"
+                          th:selected="${cruise.ship != null and cruise.ship.shipId == s.shipId}">
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Departure Port <span class="text-danger">*</span></label>
+                <select class="form-select" name="departurePort.portId" required>
+                  <option value="">-- Select Port --</option>
+                  <option th:each="p : ${ports}"
+                          th:value="${p.portId}"
+                          th:text="${p.portName + ' (' + p.portCode + ')'}"
+                          th:selected="${cruise.departurePort != null and cruise.departurePort.portId == p.portId}">
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Arrival Port <span class="text-danger">*</span></label>
+                <select class="form-select" name="arrivalPort.portId" required>
+                  <option value="">-- Select Port --</option>
+                  <option th:each="p : ${ports}"
+                          th:value="${p.portId}"
+                          th:text="${p.portName + ' (' + p.portCode + ')'}"
+                          th:selected="${cruise.arrivalPort != null and cruise.arrivalPort.portId == p.portId}">
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Departure Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" th:field="*{departureDate}" required/>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Return Date</label>
+                <input type="date" class="form-control" th:field="*{returnDate}"/>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Duration (Days)</label>
+                <input type="number" class="form-control" th:field="*{durationDays}" min="1"/>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Base Price <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" step="0.01" min="0" class="form-control"
+                         th:field="*{basePrice}" required/>
+                </div>
+              </div>
+
+              <div class="col-12 pt-2">
+                <button type="submit" class="btn btn-primary me-2">
+                  <i class="bi bi-check-lg me-1"></i>Save Cruise
+                </button>
+                <a th:href="@{/cruises}" class="btn btn-outline-secondary">Cancel</a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

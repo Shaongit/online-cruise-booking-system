@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Cruises')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2 sidebar p-0">
+      <div th:replace="~{fragments/layout :: sidebar('cruises')}"></div>
+    </div>
+    <main class="col-md-10 p-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-semibold mb-0"><i class="bi bi-compass me-2 text-primary"></i>Cruises</h2>
+        <a th:href="@{/cruises/new}" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-1"></i>New Cruise
+        </a>
+      </div>
+
+      <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Cruise Name</th>
+                  <th>Ship</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Departure</th>
+                  <th>Return</th>
+                  <th>Days</th>
+                  <th>Base Price</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="c : ${cruises}">
+                  <td th:text="${c.cruiseId}"></td>
+                  <td class="fw-semibold" th:text="${c.cruiseName}"></td>
+                  <td th:text="${c.ship != null ? c.ship.shipName : '-'}"></td>
+                  <td th:text="${c.departurePort != null ? c.departurePort.portName : '-'}"></td>
+                  <td th:text="${c.arrivalPort != null ? c.arrivalPort.portName : '-'}"></td>
+                  <td th:text="${c.departureDate}"></td>
+                  <td th:text="${c.returnDate}"></td>
+                  <td th:text="${c.durationDays}"></td>
+                  <td th:text="'$' + ${c.basePrice}"></td>
+                  <td>
+                    <span class="badge"
+                          th:classappend="${c.status == 'AVAILABLE'} ? 'bg-success' : (${c.status == 'CANCELLED'} ? 'bg-danger' : 'bg-secondary')"
+                          th:text="${c.status}"></span>
+                  </td>
+                  <td class="text-nowrap">
+                    <a th:href="@{/cruises/{id}/edit(id=${c.cruiseId})}"
+                       class="btn btn-sm btn-outline-warning me-1" title="Edit">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <a th:href="@{/cruises/{id}/delete(id=${c.cruiseId})}"
+                       class="btn btn-sm btn-outline-danger" title="Delete"
+                       onclick="return confirm('Delete this cruise?')">
+                      <i class="bi bi-trash"></i>
+                    </a>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(cruises)}">
+                  <td colspan="11" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>No cruises found.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

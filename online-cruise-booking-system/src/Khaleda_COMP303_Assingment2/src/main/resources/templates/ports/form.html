@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Port Form')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2 sidebar p-0">
+      <div th:replace="~{fragments/layout :: sidebar('ports')}"></div>
+    </div>
+    <main class="col-md-10 p-4">
+      <div class="d-flex align-items-center mb-4">
+        <a th:href="@{/ports}" class="btn btn-outline-secondary me-3">
+          <i class="bi bi-arrow-left"></i>
+        </a>
+        <h2 class="fw-semibold mb-0"
+            th:text="${port.portId != null} ? 'Edit Port' : 'New Port'">Port</h2>
+      </div>
+
+      <div class="card shadow-sm" style="max-width:560px;">
+        <div class="card-body">
+          <form th:action="@{/ports/save}" th:object="${port}" method="post">
+            <input type="hidden" th:field="*{portId}"/>
+            <div class="row g-3">
+
+              <div class="col-12">
+                <label class="form-label fw-semibold">Port Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" th:field="*{portName}" required/>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Port Code <span class="text-danger">*</span></label>
+                <input type="text" class="form-control text-uppercase" th:field="*{portCode}"
+                       maxlength="10" placeholder="e.g. YVR" required/>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">City</label>
+                <input type="text" class="form-control" th:field="*{city}"/>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Country</label>
+                <input type="text" class="form-control" th:field="*{country}"/>
+              </div>
+
+              <div class="col-12 pt-2">
+                <button type="submit" class="btn btn-primary me-2">
+                  <i class="bi bi-check-lg me-1"></i>Save Port
+                </button>
+                <a th:href="@{/ports}" class="btn btn-outline-secondary">Cancel</a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

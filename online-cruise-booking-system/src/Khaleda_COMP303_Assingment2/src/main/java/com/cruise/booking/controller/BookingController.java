@@ -2,72 +2,83 @@ package com.cruise.booking.controller;
 
 import com.cruise.booking.entity.Booking;
 import com.cruise.booking.service.BookingService;
-import org.springframework.http.ResponseEntity;
+import com.cruise.booking.service.CruiseCabinService;
+import com.cruise.booking.service.CruiseService;
+import com.cruise.booking.service.UserService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/bookings")
+@Controller
+@RequestMapping("/bookings")
 public class BookingController {
 
     private final BookingService bookingService;
+    private final UserService userService;
+    private final CruiseService cruiseService;
+    private final CruiseCabinService cruiseCabinService;
 
-    public BookingController(BookingService bookingService) {
+    public BookingController(BookingService bookingService, UserService userService,
+                                CruiseService cruiseService, CruiseCabinService cruiseCabinService) {
         this.bookingService = bookingService;
+        this.userService = userService;
+        this.cruiseService = cruiseService;
+        this.cruiseCabinService = cruiseCabinService;
     }
 
     @GetMapping
-    public List<Booking> getAllBookings() {
-        return bookingService.getAllBookings();
+    public String list(Model model) {
+        model.addAttribute("bookings", bookingService.getAllBookings());
+        return "bookings/list";
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Booking> getBookingById(@PathVariable Long id) {
-        return bookingService.getBookingById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/new")
+    public String showCreateForm(Model model) {
+        model.addAttribute("booking", new Booking());
+        model.addAttribute("users", userService.getAllUsers());
+        model.addAttribute("cruises", cruiseService.getAvailableCruises());
+        model.addAttribute("cabins", cruiseCabinService.getAllCruiseCabins());
+        return "bookings/form";
     }
 
-    @GetMapping("/user/{userId}")
-    public List<Booking> getBookingsByUser(@PathVariable Long userId) {
-        return bookingService.getBookingsByUserId(userId);
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes ra) {
+        return bookingService.getBookingById(id).map(booking -> {
+            model.addAttribute("booking", booking);
+            model.addAttribute("users", userService.getAllUsers());
+            model.addAttribute("cruises", cruiseService.getAvailableCruises());
+            model.addAttribute("cabins", cruiseCabinService.getAllCruiseCabins());
+            return "bookings/form";
+        }).orElseGet(() -> {
+            ra.addFlashAttribute("error", "Booking not found");
+            return "redirect:/bookings";
+        });
     }
 
-    @GetMapping("/cruise/{cruiseId}")
-    public List<Booking> getBookingsByCruise(@PathVariable Long cruiseId) {
-        return bookingService.getBookingsByCruiseId(cruiseId);
+    @PostMapping("/save")
+    public String save(@ModelAttribute Booking booking, RedirectAttributes ra) {
+        if (booking.getBookingId() != null) {
+            bookingService.updateBooking(booking.getBookingId(), booking);
+            ra.addFlashAttribute("success", "Booking updated successfully.");
+        } else {
+            bookingService.saveBooking(booking);
+            ra.addFlashAttribute("success", "Booking created successfully.");
+        }
+        return "redirect:/bookings";
     }
 
-    @PostMapping
-    public Booking createBooking(@RequestBody Booking booking) {
-        return bookingService.saveBooking(booking);
+    @GetMapping("/{id}/cancel")
+    public String cancel(@PathVariable Long id, RedirectAttributes ra) {
+        bookingService.cancelBooking(id);
+        ra.addFlashAttribute("success", "Booking cancelled.");
+        return "redirect:/bookings";
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Booking> updateBooking(@PathVariable Long id, @RequestBody Booking booking) {
-        return bookingService.getBookingById(id)
-                .map(existing -> ResponseEntity.ok(bookingService.updateBooking(id, booking)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PutMapping("/{id}/cancel")
-    public ResponseEntity<Void> cancelBooking(@PathVariable Long id) {
-        return bookingService.getBookingById(id)
-                .map(existing -> {
-                    bookingService.cancelBooking(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
-        return bookingService.getBookingById(id)
-                .map(existing -> {
-                    bookingService.deleteBooking(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/{id}/delete")
+    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+        bookingService.deleteBooking(id);
+        ra.addFlashAttribute("success", "Booking deleted.");
+        return "redirect:/bookings";
     }
 }

@@ -2,13 +2,13 @@ package com.cruise.booking.controller;
 
 import com.cruise.booking.entity.User;
 import com.cruise.booking.service.UserService;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/users")
+@Controller
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -18,39 +18,44 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public String list(Model model) {
+        model.addAttribute("users", userService.getAllUsers());
+        return "users/list";
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return userService.getUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/new")
+    public String showCreateForm(Model model) {
+        model.addAttribute("user", new User());
+        return "users/form";
     }
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        if (userService.existsByEmail(user.getEmail())) {
-            return ResponseEntity.badRequest().build();
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes ra) {
+        return userService.getUserById(id).map(user -> {
+            model.addAttribute("user", user);
+            return "users/form";
+        }).orElseGet(() -> {
+            ra.addFlashAttribute("error", "User not found");
+            return "redirect:/users";
+        });
+    }
+
+    @PostMapping("/save")
+    public String save(@ModelAttribute User user, RedirectAttributes ra) {
+        if (user.getUserId() != null) {
+            userService.updateUser(user.getUserId(), user);
+            ra.addFlashAttribute("success", "User updated successfully.");
+        } else {
+            userService.saveUser(user);
+            ra.addFlashAttribute("success", "User created successfully.");
         }
-        return ResponseEntity.ok(userService.saveUser(user));
+        return "redirect:/users";
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        return userService.getUserById(id)
-                .map(existing -> ResponseEntity.ok(userService.updateUser(id, user)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        return userService.getUserById(id)
-                .map(existing -> {
-                    userService.deleteUser(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/{id}/delete")
+    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+        userService.deleteUser(id);
+        ra.addFlashAttribute("success", "User deleted.");
+        return "redirect:/users";
     }
 }

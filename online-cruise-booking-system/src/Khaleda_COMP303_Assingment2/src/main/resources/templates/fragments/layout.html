@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${title} + ' | Cruise Booking System'">Cruise Booking System</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        body { background-color: #f5f7fa; }
+        .sidebar { min-height: calc(100vh - 56px); background: #1a3a5c; }
+        .sidebar .nav-link { color: rgba(255,255,255,.75); border-radius: 6px; padding: .5rem 1rem; }
+        .sidebar .nav-link:hover { color: #fff; background: rgba(255,255,255,.12); }
+        .sidebar .nav-link.active { color: #fff; background: rgba(255,255,255,.2); }
+        .sidebar .nav-link i { width: 22px; }
+        .sidebar .section-label { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.4); }
+        .stat-card { border-left: 4px solid; transition: box-shadow .2s; }
+        .stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.12) !important; }
+        .stat-card.blue  { border-color: #0d6efd; }
+        .stat-card.green { border-color: #198754; }
+        .stat-card.orange{ border-color: #fd7e14; }
+        .stat-card.purple{ border-color: #6f42c1; }
+        main { min-height: calc(100vh - 56px); }
+    </style>
+</head>
+
+<nav th:fragment="navbar" class="navbar navbar-dark sticky-top shadow-sm" style="background:#1a3a5c; z-index:1030;">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold fs-5" th:href="@{/}">
+            <i class="bi bi-ship me-2"></i>Cruise Booking System
+        </a>
+        <span class="text-white-50 small d-none d-md-inline">Online Cruise Booking &amp; Management</span>
+    </div>
+</nav>
+
+<div th:fragment="sidebar(activePage)" class="d-flex flex-column p-3 h-100">
+    <ul class="nav nav-pills flex-column gap-1 mb-auto">
+        <li>
+            <a th:href="@{/}" class="nav-link" th:classappend="${activePage == 'home'} ? ' active'">
+                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+            </a>
+        </li>
+        <li class="mt-2">
+            <span class="section-label px-2 d-block mb-1">Management</span>
+        </li>
+        <li>
+            <a th:href="@{/cruises}" class="nav-link" th:classappend="${activePage == 'cruises'} ? ' active'">
+                <i class="bi bi-compass me-2"></i>Cruises
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/ships}" class="nav-link" th:classappend="${activePage == 'ships'} ? ' active'">
+                <i class="bi bi-ship me-2"></i>Ships
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/ports}" class="nav-link" th:classappend="${activePage == 'ports'} ? ' active'">
+                <i class="bi bi-geo-alt me-2"></i>Ports
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/users}" class="nav-link" th:classappend="${activePage == 'users'} ? ' active'">
+                <i class="bi bi-people me-2"></i>Users
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/bookings}" class="nav-link" th:classappend="${activePage == 'bookings'} ? ' active'">
+                <i class="bi bi-calendar-check me-2"></i>Bookings
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/payments}" class="nav-link" th:classappend="${activePage == 'payments'} ? ' active'">
+                <i class="bi bi-credit-card me-2"></i>Payments
+            </a>
+        </li>
+    </ul>
+</div>
+
+<th:block th:fragment="scripts">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</th:block>
+</html>

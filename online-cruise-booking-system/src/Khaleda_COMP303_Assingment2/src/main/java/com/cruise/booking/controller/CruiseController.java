@@ -2,57 +2,70 @@ package com.cruise.booking.controller;
 
 import com.cruise.booking.entity.Cruise;
 import com.cruise.booking.service.CruiseService;
-import org.springframework.http.ResponseEntity;
+import com.cruise.booking.service.PortService;
+import com.cruise.booking.service.ShipService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/cruises")
+@Controller
+@RequestMapping("/cruises")
 public class CruiseController {
 
     private final CruiseService cruiseService;
+    private final ShipService shipService;
+    private final PortService portService;
 
-    public CruiseController(CruiseService cruiseService) {
+    public CruiseController(CruiseService cruiseService, ShipService shipService, PortService portService) {
         this.cruiseService = cruiseService;
+        this.shipService = shipService;
+        this.portService = portService;
     }
 
     @GetMapping
-    public List<Cruise> getAllCruises() {
-        return cruiseService.getAllCruises();
+    public String list(Model model) {
+        model.addAttribute("cruises", cruiseService.getAllCruises());
+        return "cruises/list";
     }
 
-    @GetMapping("/available")
-    public List<Cruise> getAvailableCruises() {
-        return cruiseService.getAvailableCruises();
+    @GetMapping("/new")
+    public String showCreateForm(Model model) {
+        model.addAttribute("cruise", new Cruise());
+        model.addAttribute("ships", shipService.getAllShips());
+        model.addAttribute("ports", portService.getAllPorts());
+        return "cruises/form";
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Cruise> getCruiseById(@PathVariable Long id) {
-        return cruiseService.getCruiseById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes ra) {
+        return cruiseService.getCruiseById(id).map(cruise -> {
+            model.addAttribute("cruise", cruise);
+            model.addAttribute("ships", shipService.getAllShips());
+            model.addAttribute("ports", portService.getAllPorts());
+            return "cruises/form";
+        }).orElseGet(() -> {
+            ra.addFlashAttribute("error", "Cruise not found");
+            return "redirect:/cruises";
+        });
     }
 
-    @PostMapping
-    public Cruise createCruise(@RequestBody Cruise cruise) {
-        return cruiseService.saveCruise(cruise);
+    @PostMapping("/save")
+    public String save(@ModelAttribute Cruise cruise, RedirectAttributes ra) {
+        if (cruise.getCruiseId() != null) {
+            cruiseService.updateCruise(cruise.getCruiseId(), cruise);
+            ra.addFlashAttribute("success", "Cruise updated successfully.");
+        } else {
+            cruiseService.saveCruise(cruise);
+            ra.addFlashAttribute("success", "Cruise created successfully.");
+        }
+        return "redirect:/cruises";
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Cruise> updateCruise(@PathVariable Long id, @RequestBody Cruise cruise) {
-        return cruiseService.getCruiseById(id)
-                .map(existing -> ResponseEntity.ok(cruiseService.updateCruise(id, cruise)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCruise(@PathVariable Long id) {
-        return cruiseService.getCruiseById(id)
-                .map(existing -> {
-                    cruiseService.deleteCruise(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/{id}/delete")
+    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+        cruiseService.deleteCruise(id);
+        ra.addFlashAttribute("success", "Cruise deleted.");
+        return "redirect:/cruises";
     }
 }

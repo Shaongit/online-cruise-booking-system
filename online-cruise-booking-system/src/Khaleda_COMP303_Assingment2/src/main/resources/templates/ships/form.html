@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Ship Form')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2 sidebar p-0">
+      <div th:replace="~{fragments/layout :: sidebar('ships')}"></div>
+    </div>
+    <main class="col-md-10 p-4">
+      <div class="d-flex align-items-center mb-4">
+        <a th:href="@{/ships}" class="btn btn-outline-secondary me-3">
+          <i class="bi bi-arrow-left"></i>
+        </a>
+        <h2 class="fw-semibold mb-0"
+            th:text="${ship.shipId != null} ? 'Edit Ship' : 'New Ship'">Ship</h2>
+      </div>
+
+      <div class="card shadow-sm" style="max-width:640px;">
+        <div class="card-body">
+          <form th:action="@{/ships/save}" th:object="${ship}" method="post">
+            <input type="hidden" th:field="*{shipId}"/>
+            <div class="row g-3">
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Ship Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" th:field="*{shipName}" required/>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Ship Type</label>
+                <input type="text" class="form-control" th:field="*{shipType}"
+                       placeholder="e.g. Ocean Liner, Expedition"/>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Capacity</label>
+                <input type="number" class="form-control" th:field="*{capacity}" min="1"/>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Year Built</label>
+                <input type="number" class="form-control" th:field="*{yearBuilt}"
+                       min="1900" max="2100"/>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Operator</label>
+                <input type="text" class="form-control" th:field="*{operator}"/>
+              </div>
+
+              <div class="col-12 pt-2">
+                <button type="submit" class="btn btn-primary me-2">
+                  <i class="bi bi-check-lg me-1"></i>Save Ship
+                </button>
+                <a th:href="@{/ships}" class="btn btn-outline-secondary">Cancel</a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

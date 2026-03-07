@@ -2,13 +2,13 @@ package com.cruise.booking.controller;
 
 import com.cruise.booking.entity.Ship;
 import com.cruise.booking.service.ShipService;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/ships")
+@Controller
+@RequestMapping("/ships")
 public class ShipController {
 
     private final ShipService shipService;
@@ -18,36 +18,44 @@ public class ShipController {
     }
 
     @GetMapping
-    public List<Ship> getAllShips() {
-        return shipService.getAllShips();
+    public String list(Model model) {
+        model.addAttribute("ships", shipService.getAllShips());
+        return "ships/list";
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Ship> getShipById(@PathVariable Long id) {
-        return shipService.getShipById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/new")
+    public String showCreateForm(Model model) {
+        model.addAttribute("ship", new Ship());
+        return "ships/form";
     }
 
-    @PostMapping
-    public Ship createShip(@RequestBody Ship ship) {
-        return shipService.saveShip(ship);
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes ra) {
+        return shipService.getShipById(id).map(ship -> {
+            model.addAttribute("ship", ship);
+            return "ships/form";
+        }).orElseGet(() -> {
+            ra.addFlashAttribute("error", "Ship not found");
+            return "redirect:/ships";
+        });
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Ship> updateShip(@PathVariable Long id, @RequestBody Ship ship) {
-        return shipService.getShipById(id)
-                .map(existing -> ResponseEntity.ok(shipService.updateShip(id, ship)))
-                .orElse(ResponseEntity.notFound().build());
+    @PostMapping("/save")
+    public String save(@ModelAttribute Ship ship, RedirectAttributes ra) {
+        if (ship.getShipId() != null) {
+            shipService.updateShip(ship.getShipId(), ship);
+            ra.addFlashAttribute("success", "Ship updated successfully.");
+        } else {
+            shipService.saveShip(ship);
+            ra.addFlashAttribute("success", "Ship created successfully.");
+        }
+        return "redirect:/ships";
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteShip(@PathVariable Long id) {
-        return shipService.getShipById(id)
-                .map(existing -> {
-                    shipService.deleteShip(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/{id}/delete")
+    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+        shipService.deleteShip(id);
+        ra.addFlashAttribute("success", "Ship deleted.");
+        return "redirect:/ships";
     }
 }

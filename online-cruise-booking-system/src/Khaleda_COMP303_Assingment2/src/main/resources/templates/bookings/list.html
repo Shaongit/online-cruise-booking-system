@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Bookings')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2 sidebar p-0">
+      <div th:replace="~{fragments/layout :: sidebar('bookings')}"></div>
+    </div>
+    <main class="col-md-10 p-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-semibold mb-0"><i class="bi bi-calendar-check me-2 text-primary"></i>Bookings</h2>
+        <a th:href="@{/bookings/new}" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-1"></i>New Booking
+        </a>
+      </div>
+
+      <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th>#</th>
+                  <th>User</th>
+                  <th>Cruise</th>
+                  <th>Cabin</th>
+                  <th>Date</th>
+                  <th>Passengers</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="b : ${bookings}">
+                  <td th:text="${b.bookingId}"></td>
+                  <td th:text="${b.user != null ? b.user.firstName + ' ' + b.user.lastName : '-'}"></td>
+                  <td th:text="${b.cruise != null ? b.cruise.cruiseName : '-'}"></td>
+                  <td th:text="${b.cruiseCabin != null ? b.cruiseCabin.cabinNumber : '-'}"></td>
+                  <td th:text="${b.bookingDate}"></td>
+                  <td th:text="${b.numberOfPassengers}"></td>
+                  <td th:text="'$' + ${b.totalPrice}"></td>
+                  <td>
+                    <span class="badge"
+                          th:classappend="${b.bookingStatus == 'CONFIRMED'} ? 'bg-success' : (${b.bookingStatus == 'CANCELLED'} ? 'bg-danger' : 'bg-warning text-dark')"
+                          th:text="${b.bookingStatus}"></span>
+                  </td>
+                  <td class="text-nowrap">
+                    <a th:href="@{/bookings/{id}/edit(id=${b.bookingId})}"
+                       class="btn btn-sm btn-outline-warning me-1" title="Edit">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <a th:if="${b.bookingStatus != 'CANCELLED'}"
+                       th:href="@{/bookings/{id}/cancel(id=${b.bookingId})}"
+                       class="btn btn-sm btn-outline-secondary me-1" title="Cancel Booking"
+                       onclick="return confirm('Cancel this booking?')">
+                      <i class="bi bi-x-circle"></i>
+                    </a>
+                    <a th:href="@{/payments/booking/{id}(id=${b.bookingId})}"
+                       class="btn btn-sm btn-outline-info me-1" title="View Payments">
+                      <i class="bi bi-credit-card"></i>
+                    </a>
+                    <a th:href="@{/bookings/{id}/delete(id=${b.bookingId})}"
+                       class="btn btn-sm btn-outline-danger" title="Delete"
+                       onclick="return confirm('Delete this booking?')">
+                      <i class="bi bi-trash"></i>
+                    </a>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(bookings)}">
+                  <td colspan="9" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>No bookings found.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
