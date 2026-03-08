@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Payment Form')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2 sidebar p-0">
+      <div th:replace="~{fragments/layout :: sidebar('payments')}"></div>
+    </div>
+    <main class="col-md-10 p-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-semibold mb-0">
+          <i class="bi bi-credit-card me-2 text-primary"></i>Process Payment
+        </h2>
+        <a th:href="@{/bookings}" class="btn btn-secondary">
+          <i class="bi bi-arrow-left me-1"></i>Back to Bookings
+        </a>
+      </div>
+
+      <!-- Booking Summary -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Booking Summary</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Booking ID:</strong> <span th:text="${booking.bookingId}"></span></p>
+              <p><strong>Customer:</strong> <span th:text="${booking.user != null ? booking.user.firstName + ' ' + booking.user.lastName : '-'}"></span></p>
+              <p><strong>Cruise:</strong> <span th:text="${booking.cruise != null ? booking.cruise.cruiseName : '-'}"></span></p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Number of Passengers:</strong> <span th:text="${booking.numberOfPassengers}"></span></p>
+              <p><strong>Total Amount:</strong> <span class="text-success fs-5" th:text="'$' + ${booking.totalPrice}"></span></p>
+              <p><strong>Status:</strong> 
+                <span class="badge"
+                      th:classappend="${booking.bookingStatus == 'CONFIRMED'} ? 'bg-success' : (${booking.bookingStatus == 'CANCELLED'} ? 'bg-danger' : 'bg-warning text-dark')"
+                      th:text="${booking.bookingStatus}"></span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Form -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">Payment Details</h5>
+        </div>
+        <div class="card-body">
+          <form th:action="@{/payments/save}" method="post" th:object="${payment}">
+            <input type="hidden" name="bookingId" th:value="${booking.bookingId}"/>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Amount <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" step="0.01" min="0" class="form-control" 
+                         th:field="*{amount}" required readonly/>
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Currency</label>
+                <input type="text" class="form-control" th:field="*{currency}" readonly/>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Payment Method <span class="text-danger">*</span></label>
+                <select class="form-select" th:field="*{paymentMethod}" required>
+                  <option value="">-- Select Payment Method --</option>
+                  <option value="CREDIT_CARD">Credit Card</option>
+                  <option value="DEBIT_CARD">Debit Card</option>
+                  <option value="PAYPAL">PayPal</option>
+                  <option value="BANK_TRANSFER">Bank Transfer</option>
+                </select>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Card Last Four Digits</label>
+                <input type="text" maxlength="4" pattern="[0-9]{4}" class="form-control" 
+                       th:field="*{cardLastFour}" placeholder="1234"/>
+                <small class="text-muted">Optional - Last 4 digits for reference</small>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <label class="form-label">Payment Gateway Reference</label>
+                <input type="text" class="form-control" th:field="*{paymentGatewayRef}" 
+                       placeholder="Transaction reference number"/>
+                <small class="text-muted">Optional - External payment reference</small>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <a th:href="@{/bookings}" class="btn btn-secondary">
+                <i class="bi bi-x-circle me-1"></i>Cancel
+              </a>
+              <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-circle me-1"></i>Process Payment
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

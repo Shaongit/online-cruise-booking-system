@@ -57,21 +57,24 @@
                           th:text="${b.bookingStatus}"></span>
                   </td>
                   <td class="text-nowrap">
-                    <a th:href="@{/bookings/{id}/edit(id=${b.bookingId})}"
+                    <a th:if="${b.bookingStatus != 'CANCELLED' and b.bookingStatus != 'CONFIRMED'}"
+                       th:href="@{/bookings/{id}/edit(id=${b.bookingId})}"
                        class="btn btn-sm btn-outline-warning me-1" title="Edit">
                       <i class="bi bi-pencil"></i>
                     </a>
                     <a th:if="${b.bookingStatus != 'CANCELLED'}"
+                       th:href="@{/payments/new/{id}(id=${b.bookingId})}"
+                       class="btn btn-sm btn-outline-success me-1" title="Make Payment">
+                      <i class="bi bi-credit-card"></i>
+                    </a>
+                    <a th:if="${b.bookingStatus != 'CANCELLED' and b.bookingStatus != 'CONFIRMED'}"
                        th:href="@{/bookings/{id}/cancel(id=${b.bookingId})}"
                        class="btn btn-sm btn-outline-secondary me-1" title="Cancel Booking"
                        onclick="return confirm('Cancel this booking?')">
                       <i class="bi bi-x-circle"></i>
                     </a>
-                    <a th:href="@{/payments/booking/{id}(id=${b.bookingId})}"
-                       class="btn btn-sm btn-outline-info me-1" title="View Payments">
-                      <i class="bi bi-credit-card"></i>
-                    </a>
-                    <a th:href="@{/bookings/{id}/delete(id=${b.bookingId})}"
+                    <a th:if="${b.bookingStatus != 'CANCELLED' and b.bookingStatus != 'CONFIRMED'}"
+                       th:href="@{/bookings/{id}/delete(id=${b.bookingId})}"
                        class="btn btn-sm btn-outline-danger" title="Delete"
                        onclick="return confirm('Delete this booking?')">
                       <i class="bi bi-trash"></i>

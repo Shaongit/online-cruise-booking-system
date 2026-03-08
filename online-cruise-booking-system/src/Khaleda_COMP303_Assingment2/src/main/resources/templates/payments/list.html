@@ -36,6 +36,7 @@
                   <th>Status</th>
                   <th>Transaction Date</th>
                   <th>Gateway Ref</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -58,9 +59,16 @@
                   </td>
                   <td th:text="${p.transactionDate != null ? #temporals.format(p.transactionDate, 'yyyy-MM-dd HH:mm') : '-'}"></td>
                   <td th:text="${p.paymentGatewayRef != null ? p.paymentGatewayRef : '-'}"></td>
+                  <td>
+                    <a th:href="@{/payments/receipt/{id}(id=${p.transactionId})}" 
+                       class="btn btn-sm btn-outline-primary" 
+                       title="Download PDF Receipt">
+                      <i class="bi bi-printer"></i> PDF
+                    </a>
+                  </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(payments)}">
-                  <td colspan="9" class="text-center text-muted py-4">
+                  <td colspan="10" class="text-center text-muted py-4">
                     <i class="bi bi-inbox fs-3 d-block mb-2"></i>No payment transactions found.
                   </td>
                 </tr>
