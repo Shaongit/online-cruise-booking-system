@@ -32,6 +32,9 @@ public class User {
     @Column(name = "postal_code")
     private String postalCode;
 
+    @Column(name = "role")
+    private String role;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -69,6 +72,9 @@ public class User {
 
     public String getPostalCode() { return postalCode; }
     public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

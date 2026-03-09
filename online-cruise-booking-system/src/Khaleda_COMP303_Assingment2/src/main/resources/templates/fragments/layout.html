@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
 <head th:fragment="head(title)">
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -32,6 +33,17 @@
             <i class="bi bi-ship me-2"></i>Cruise Booking System
         </a>
         <span class="text-white-50 small d-none d-md-inline">Online Cruise Booking &amp; Management</span>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span class="text-white-50 small d-none d-md-inline">
+                <i class="bi bi-person-circle me-1"></i>
+                <span sec:authentication="name"></span>
+            </span>
+            <form th:action="@{/logout}" method="post" class="mb-0">
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            </form>
+        </div>
     </div>
 </nav>
 

@@ -51,6 +51,14 @@
               </div>
 
               <div class="col-md-6">
+                <label class="form-label fw-semibold">Role</label>
+                <select class="form-select" th:field="*{role}">
+                  <option value="ROLE_USER">User</option>
+                  <option value="ROLE_ADMIN">Admin</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
                 <label class="form-label fw-semibold">City</label>
                 <input type="text" class="form-control" th:field="*{city}"/>
               </div>

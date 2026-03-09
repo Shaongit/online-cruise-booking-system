@@ -3,6 +3,7 @@ package com.cruise.booking.config;
 import com.cruise.booking.entity.*;
 import com.cruise.booking.repository.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -18,23 +19,56 @@ public class DataLoader implements CommandLineRunner {
     private final UserRepository userRepository;
     private final CruiseRepository cruiseRepository;
     private final CruiseCabinRepository cruiseCabinRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public DataLoader(PortRepository portRepository,
                       ShipRepository shipRepository,
                       CabinTypeRepository cabinTypeRepository,
                       UserRepository userRepository,
                       CruiseRepository cruiseRepository,
-                      CruiseCabinRepository cruiseCabinRepository) {
+                      CruiseCabinRepository cruiseCabinRepository,
+                      PasswordEncoder passwordEncoder) {
         this.portRepository = portRepository;
         this.shipRepository = shipRepository;
         this.cabinTypeRepository = cabinTypeRepository;
         this.userRepository = userRepository;
         this.cruiseRepository = cruiseRepository;
         this.cruiseCabinRepository = cruiseCabinRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) throws Exception {
+        // ---------------------------------------------------------------
+        // Migrate existing users: hash any plain-text passwords and set role
+        // ---------------------------------------------------------------
+        userRepository.findAll().forEach(u -> {
+            boolean changed = false;
+            if (u.getPasswordHash() != null && !u.getPasswordHash().startsWith("$2")) {
+                u.setPasswordHash(passwordEncoder.encode(u.getPasswordHash()));
+                changed = true;
+            }
+            if (u.getRole() == null || u.getRole().isBlank()) {
+                u.setRole("ROLE_USER");
+                changed = true;
+            }
+            if (changed) userRepository.save(u);
+        });
+
+        // Ensure an admin account always exists
+        if (!userRepository.existsByEmail("admin@cruise.com")) {
+            User admin = new User();
+            admin.setEmail("admin@cruise.com");
+            admin.setPasswordHash(passwordEncoder.encode("Admin@123"));
+            admin.setFirstName("System");
+            admin.setLastName("Admin");
+            admin.setRole("ROLE_ADMIN");
+            admin.setCreatedAt(LocalDateTime.now());
+            admin.setUpdatedAt(LocalDateTime.now());
+            userRepository.save(admin);
+            System.out.println("Admin account created: admin@cruise.com / Admin@123");
+        }
+
         // Check if data already exists to avoid duplicate entries
         if (portRepository.count() > 0) {
             System.out.println("Database already contains data. Skipping seed data loading.");
@@ -227,13 +261,14 @@ public class DataLoader implements CommandLineRunner {
                            String phone, String address, String city, String postalCode) {
         User user = new User();
         user.setEmail(email);
-        user.setPasswordHash(password); // In production, this should be hashed!
+        user.setPasswordHash(passwordEncoder.encode(password));
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setPhone(phone);
         user.setAddress(address);
         user.setCity(city);
         user.setPostalCode(postalCode);
+        user.setRole("ROLE_USER");
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         return user;
