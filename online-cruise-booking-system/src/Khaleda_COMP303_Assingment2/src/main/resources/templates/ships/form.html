@@ -19,8 +19,10 @@
 
       <div class="card shadow-sm" style="max-width:640px;">
         <div class="card-body">
-          <form th:action="@{/ships/save}" th:object="${ship}" method="post">
+          <form th:action="@{/ships/save}" th:object="${ship}" method="post"
+                enctype="multipart/form-data">
             <input type="hidden" th:field="*{shipId}"/>
+            <input type="hidden" th:field="*{imageUrl}"/>
             <div class="row g-3">
 
               <div class="col-md-6">
@@ -48,6 +50,20 @@
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Operator</label>
                 <input type="text" class="form-control" th:field="*{operator}"/>
+              </div>
+
+              <!-- Ship Image -->
+              <div class="col-12">
+                <label class="form-label fw-semibold">Ship Image</label>
+                <!-- Preview existing image on edit -->
+                <div th:if="${ship.imageUrl != null and !ship.imageUrl.isEmpty()}" class="mb-2">
+                  <img th:src="@{${ship.imageUrl}}" alt="Current ship image"
+                       class="rounded border" style="max-height:160px; object-fit:cover;"/>
+                  <div class="form-text">Upload a new image to replace the current one.</div>
+                </div>
+                <input type="file" class="form-control" name="imageFile"
+                       accept="image/jpeg,image/png,image/webp,image/gif"/>
+                <div class="form-text">Accepted formats: JPG, PNG, WEBP, GIF &mdash; max 10 MB.</div>
               </div>
 
               <div class="col-12 pt-2">

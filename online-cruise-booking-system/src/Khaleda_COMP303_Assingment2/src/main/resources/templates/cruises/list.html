@@ -61,6 +61,10 @@
                           th:text="${c.status}"></span>
                   </td>
                   <td class="text-nowrap">
+                    <a th:href="@{/cruises/{id}/view(id=${c.cruiseId})}"
+                       class="btn btn-sm btn-outline-info me-1" title="View">
+                      <i class="bi bi-eye"></i>
+                    </a>
                     <a th:href="@{/cruises/{id}/edit(id=${c.cruiseId})}"
                        class="btn btn-sm btn-outline-warning me-1" title="Edit">
                       <i class="bi bi-pencil"></i>

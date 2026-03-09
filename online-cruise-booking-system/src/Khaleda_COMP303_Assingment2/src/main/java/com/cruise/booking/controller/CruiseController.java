@@ -37,6 +37,17 @@ public class CruiseController {
         return "cruises/form";
     }
 
+    @GetMapping("/{id}/view")
+    public String viewDetail(@PathVariable Long id, Model model, RedirectAttributes ra) {
+        return cruiseService.getCruiseById(id).map(cruise -> {
+            model.addAttribute("cruise", cruise);
+            return "cruises/detail";
+        }).orElseGet(() -> {
+            ra.addFlashAttribute("error", "Cruise not found");
+            return "redirect:/cruises";
+        });
+    }
+
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes ra) {
         return cruiseService.getCruiseById(id).map(cruise -> {

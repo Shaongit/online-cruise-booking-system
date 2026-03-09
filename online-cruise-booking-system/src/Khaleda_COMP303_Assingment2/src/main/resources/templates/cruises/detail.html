@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Cruise Details')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2 sidebar p-0">
+      <div th:replace="~{fragments/layout :: sidebar('cruises')}"></div>
+    </div>
+    <main class="col-md-10 p-4">
+
+      <!-- Header -->
+      <div class="d-flex align-items-center mb-4 gap-3">
+        <a th:href="@{/cruises}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+          <h2 class="fw-semibold mb-0" th:text="${cruise.cruiseName}">Cruise Name</h2>
+          <span class="badge fs-6 mt-1"
+                th:classappend="${cruise.status == 'Available'} ? 'bg-success' : (${cruise.status == 'CANCELLED'} ? 'bg-danger' : 'bg-secondary')"
+                th:text="${cruise.status}"></span>
+        </div>
+        <div class="ms-auto">
+          <a th:href="@{/cruises/{id}/edit(id=${cruise.cruiseId})}" class="btn btn-warning me-2">
+            <i class="bi bi-pencil me-1"></i>Edit
+          </a>
+          <a th:href="@{/cruises/{id}/delete(id=${cruise.cruiseId})}" class="btn btn-danger"
+             onclick="return confirm('Delete this cruise?')">
+            <i class="bi bi-trash me-1"></i>Delete
+          </a>
+        </div>
+      </div>
+
+      <div class="row g-4">
+
+        <!-- Ship Card -->
+        <div class="col-lg-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-dark text-white fw-semibold">
+              <i class="bi bi-ship me-2"></i>Ship Information
+            </div>
+            <!-- Ship Image -->
+            <div th:if="${cruise.ship != null and cruise.ship.imageUrl != null and !cruise.ship.imageUrl.isEmpty()}">
+              <img th:src="@{${cruise.ship.imageUrl}}"
+                   th:alt="${cruise.ship.shipName}"
+                   class="card-img-top"
+                   style="height:220px; object-fit:cover;"/>
+            </div>
+            <div th:if="${cruise.ship == null or cruise.ship.imageUrl == null or cruise.ship.imageUrl.isEmpty()}"
+                 class="d-flex align-items-center justify-content-center bg-light"
+                 style="height:220px;">
+              <i class="bi bi-image text-muted" style="font-size:3rem;"></i>
+            </div>
+            <div class="card-body">
+              <table class="table table-sm mb-0">
+                <tbody>
+                  <tr>
+                    <th class="text-muted fw-normal" style="width:45%">Name</th>
+                    <td class="fw-semibold" th:text="${cruise.ship != null ? cruise.ship.shipName : '-'}"></td>
+                  </tr>
+                  <tr>
+                    <th class="text-muted fw-normal">Type</th>
+                    <td th:text="${cruise.ship != null ? cruise.ship.shipType : '-'}"></td>
+                  </tr>
+                  <tr>
+                    <th class="text-muted fw-normal">Capacity</th>
+                    <td th:text="${cruise.ship != null ? cruise.ship.capacity + ' passengers' : '-'}"></td>
+                  </tr>
+                  <tr>
+                    <th class="text-muted fw-normal">Year Built</th>
+                    <td th:text="${cruise.ship != null ? cruise.ship.yearBuilt : '-'}"></td>
+                  </tr>
+                  <tr>
+                    <th class="text-muted fw-normal">Operator</th>
+                    <td th:text="${cruise.ship != null ? cruise.ship.operator : '-'}"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cruise Details -->
+        <div class="col-lg-8">
+          <div class="row g-4">
+
+            <!-- Itinerary Card -->
+            <div class="col-12">
+              <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white fw-semibold">
+                  <i class="bi bi-geo-alt me-2"></i>Itinerary &amp; Schedule
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-sm-6 col-md-3">
+                      <div class="text-muted small">Departure Port</div>
+                      <div class="fw-semibold" th:text="${cruise.departurePort != null ? cruise.departurePort.portName : '-'}"></div>
+                      <div class="text-muted small"
+                           th:text="${cruise.departurePort != null ? cruise.departurePort.city + ', ' + cruise.departurePort.country : ''}"></div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                      <div class="text-muted small">Arrival Port</div>
+                      <div class="fw-semibold" th:text="${cruise.arrivalPort != null ? cruise.arrivalPort.portName : '-'}"></div>
+                      <div class="text-muted small"
+                           th:text="${cruise.arrivalPort != null ? cruise.arrivalPort.city + ', ' + cruise.arrivalPort.country : ''}"></div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                      <div class="text-muted small">Departure Date</div>
+                      <div class="fw-semibold" th:text="${cruise.departureDate}"></div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                      <div class="text-muted small">Return Date</div>
+                      <div class="fw-semibold" th:text="${cruise.returnDate}"></div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                      <div class="text-muted small">Duration</div>
+                      <div class="fw-semibold" th:text="${cruise.durationDays} + ' days'"></div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                      <div class="text-muted small">Base Price</div>
+                      <div class="fw-semibold text-success" th:text="'$' + ${cruise.basePrice}"></div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                      <div class="text-muted small">Cruise ID</div>
+                      <div class="fw-semibold" th:text="${cruise.cruiseId}"></div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                      <div class="text-muted small">Created At</div>
+                      <div class="fw-semibold" th:text="${cruise.createdAt != null ? #temporals.format(cruise.createdAt, 'yyyy-MM-dd HH:mm') : '-'}"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Available Cabin Types -->
+            <div class="col-12">
+              <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white fw-semibold">
+                  <i class="bi bi-door-closed me-2"></i>Available Cabin Types
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Cabin #</th>
+                          <th>Type</th>
+                          <th>Deck</th>
+                          <th>View</th>
+                          <th>Max Guests</th>
+                          <th>Available Qty</th>
+                          <th>Price / Night</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr th:each="cc : ${cruise.cruiseCabins}">
+                          <td th:text="${cc.cabinNumber}"></td>
+                          <td class="fw-semibold" th:text="${cc.cabinType != null ? cc.cabinType.typeName : '-'}"></td>
+                          <td th:text="${cc.deck}"></td>
+                          <td th:text="${cc.viewType}"></td>
+                          <td th:text="${cc.cabinType != null ? cc.cabinType.maxOccupancy : '-'}"></td>
+                          <td>
+                            <span class="badge"
+                                  th:classappend="${cc.availableQuantity > 10} ? 'bg-success' : (${cc.availableQuantity > 0} ? 'bg-warning text-dark' : 'bg-danger')"
+                                  th:text="${cc.availableQuantity}"></span>
+                          </td>
+                          <td class="text-success fw-semibold"
+                              th:text="${cc.cabinType != null} ? '$' + ${#numbers.formatDecimal(cruise.basePrice.multiply(cc.priceMultiplier), 1, 2)} : '-'">
+                          </td>
+                        </tr>
+                        <tr th:if="${cruise.cruiseCabins == null or #lists.isEmpty(cruise.cruiseCabins)}">
+                          <td colspan="7" class="text-center text-muted py-3">
+                            <i class="bi bi-inbox d-block mb-1"></i>No cabin types assigned.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /row -->
+        </div><!-- /col-lg-8 -->
+
+      </div><!-- /row g-4 -->
+    </main>
+  </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -26,6 +26,9 @@ public class Ship {
 
     private String operator;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -51,6 +54,9 @@ public class Ship {
 
     public String getOperator() { return operator; }
     public void setOperator(String operator) { this.operator = operator; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

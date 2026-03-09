@@ -32,6 +32,7 @@
               <thead class="table-dark">
                 <tr>
                   <th>ID</th>
+                  <th>Image</th>
                   <th>Ship Name</th>
                   <th>Type</th>
                   <th>Capacity</th>
@@ -43,6 +44,13 @@
               <tbody>
                 <tr th:each="s : ${ships}">
                   <td th:text="${s.shipId}"></td>
+                  <td>
+                    <img th:if="${s.imageUrl != null and !s.imageUrl.isEmpty()}"
+                         th:src="@{${s.imageUrl}}" alt="Ship image"
+                         class="rounded" style="width:60px;height:45px;object-fit:cover;"/>
+                    <span th:if="${s.imageUrl == null or s.imageUrl.isEmpty()}"
+                          class="text-muted small"><i class="bi bi-image"></i></span>
+                  </td>
                   <td class="fw-semibold" th:text="${s.shipName}"></td>
                   <td th:text="${s.shipType}"></td>
                   <td th:text="${s.capacity}"></td>
@@ -61,7 +69,7 @@
                   </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(ships)}">
-                  <td colspan="7" class="text-center text-muted py-4">
+                  <td colspan="8" class="text-center text-muted py-4">
                     <i class="bi bi-inbox fs-3 d-block mb-2"></i>No ships found.
                   </td>
                 </tr>
