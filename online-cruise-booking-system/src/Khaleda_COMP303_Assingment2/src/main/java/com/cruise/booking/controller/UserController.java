@@ -2,19 +2,24 @@ package com.cruise.booking.controller;
 
 import com.cruise.booking.entity.User;
 import com.cruise.booking.service.UserService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping
@@ -42,10 +47,29 @@ public class UserController {
 
     @PostMapping("/save")
     public String save(@ModelAttribute User user, RedirectAttributes ra) {
-        if (user.getUserId() != null) {
+        boolean isUpdate = user.getUserId() != null;
+        if (isUpdate) {
+            userService.getUserById(user.getUserId()).ifPresent(existing -> {
+                if (user.getPasswordHash() == null || user.getPasswordHash().isBlank()) {
+                    user.setPasswordHash(existing.getPasswordHash());
+                } else {
+                    user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+                }
+                if (user.getRole() == null || user.getRole().isBlank()) {
+                    user.setRole(existing.getRole());
+                }
+                user.setCreatedAt(existing.getCreatedAt());
+            });
+            user.setUpdatedAt(LocalDateTime.now());
             userService.updateUser(user.getUserId(), user);
             ra.addFlashAttribute("success", "User updated successfully.");
         } else {
+            if (user.getPasswordHash() != null && !user.getPasswordHash().isBlank()) {
+                user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+            }
+            if (user.getRole() == null || user.getRole().isBlank()) user.setRole("ROLE_USER");
+            user.setCreatedAt(LocalDateTime.now());
+            user.setUpdatedAt(LocalDateTime.now());
             userService.saveUser(user);
             ra.addFlashAttribute("success", "User created successfully.");
         }
