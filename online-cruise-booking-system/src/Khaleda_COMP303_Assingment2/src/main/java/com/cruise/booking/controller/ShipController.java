@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.controller;
 
 import com.cruise.booking.entity.Ship;
@@ -10,6 +15,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Controller for ship management operations.
+ * Handles CRUD operations for ships and file upload for ship images.
+ * Manages ship information including images using FileStorageService.
+ */
 @Controller
 @RequestMapping("/ships")
 public class ShipController {

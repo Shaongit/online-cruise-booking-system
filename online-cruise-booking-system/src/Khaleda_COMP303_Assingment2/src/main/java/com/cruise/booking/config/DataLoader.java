@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.config;
 
 import com.cruise.booking.entity.*;
@@ -10,6 +15,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Data initialization component that runs on application startup.
+ * Loads seed data into the database for testing and demonstration purposes.
+ * Creates default admin user and populates initial cruise, ship, and port data.
+ * Migrates existing users to ensure proper password hashing and role assignment.
+ */
 @Component
 public class DataLoader implements CommandLineRunner {
 

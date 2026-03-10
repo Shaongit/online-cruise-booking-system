@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.controller;
 
 import com.cruise.booking.service.BookingService;
@@ -8,6 +13,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+/**
+ * Controller for the home/dashboard page.
+ * Displays system statistics and recent activities.
+ * Provides an overview of cruises, bookings, users, and ships.
+ */
 @Controller
 public class HomeController {
 

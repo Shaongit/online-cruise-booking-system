@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.service;
 
 import com.cruise.booking.entity.User;
@@ -7,6 +12,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Custom implementation of Spring Security's UserDetailsService.
+ * Loads user-specific data for authentication and authorization.
+ * Used by Spring Security to validate user credentials during login.
+ */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 

@@ -34,8 +34,9 @@
                   <th>#</th>
                   <th>User</th>
                   <th>Cruise</th>
+                  <th>Departure</th>
                   <th>Cabin</th>
-                  <th>Date</th>
+                  <th>Booked</th>
                   <th>Passengers</th>
                   <th>Total</th>
                   <th>Status</th>
@@ -47,6 +48,14 @@
                   <td th:text="${b.bookingId}"></td>
                   <td th:text="${b.user != null ? b.user.firstName + ' ' + b.user.lastName : '-'}"></td>
                   <td th:text="${b.cruise != null ? b.cruise.cruiseName : '-'}"></td>
+                  <td>
+                    <span th:text="${b.cruise != null ? b.cruise.departureDate : '-'}"></span>
+                    <br th:if="${daysUntilDeparture[b.bookingId] != null and daysUntilDeparture[b.bookingId] >= 0}">
+                    <small th:if="${daysUntilDeparture[b.bookingId] != null and daysUntilDeparture[b.bookingId] >= 0}" 
+                           class="text-muted">
+                      (<span th:text="${daysUntilDeparture[b.bookingId]}"></span> days)
+                    </small>
+                  </td>
                   <td th:text="${b.cruiseCabin != null ? b.cruiseCabin.cabinNumber : '-'}"></td>
                   <td th:text="${b.bookingDate}"></td>
                   <td th:text="${b.numberOfPassengers}"></td>
@@ -67,12 +76,18 @@
                        class="btn btn-sm btn-outline-success me-1" title="Make Payment">
                       <i class="bi bi-credit-card"></i>
                     </a>
-                    <a th:if="${b.bookingStatus != 'CANCELLED' and b.bookingStatus != 'CONFIRMED'}"
+                    <a th:if="${b.bookingStatus != 'CANCELLED' and b.bookingStatus != 'CONFIRMED' and cancellationEligibility[b.bookingId] == true}"
                        th:href="@{/bookings/{id}/cancel(id=${b.bookingId})}"
-                       class="btn btn-sm btn-outline-secondary me-1" title="Cancel Booking"
+                       class="btn btn-sm btn-outline-secondary me-1" title="Cancel Booking (10+ days before departure)"
                        onclick="return confirm('Cancel this booking?')">
                       <i class="bi bi-x-circle"></i>
                     </a>
+                    <button th:if="${b.bookingStatus != 'CANCELLED' and b.bookingStatus != 'CONFIRMED' and cancellationEligibility[b.bookingId] == false}"
+                            class="btn btn-sm btn-outline-secondary me-1" 
+                            disabled
+                            title="Cannot cancel within 10 days of departure">
+                      <i class="bi bi-x-circle"></i>
+                    </button>
                     <a th:if="${b.bookingStatus != 'CANCELLED' and b.bookingStatus != 'CONFIRMED'}"
                        th:href="@{/bookings/{id}/delete(id=${b.bookingId})}"
                        class="btn btn-sm btn-outline-danger" title="Delete"
@@ -82,7 +97,7 @@
                   </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(bookings)}">
-                  <td colspan="9" class="text-center text-muted py-4">
+                  <td colspan="10" class="text-center text-muted py-4">
                     <i class="bi bi-inbox fs-3 d-block mb-2"></i>No bookings found.
                   </td>
                 </tr>

@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.config;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -9,6 +14,11 @@ import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
 
+/**
+ * Database configuration class.
+ * Configures HikariCP connection pool for optimal database performance.
+ * All settings are read from application.properties for easy customization.
+ */
 @Configuration
 public class DatabaseConfig {
 

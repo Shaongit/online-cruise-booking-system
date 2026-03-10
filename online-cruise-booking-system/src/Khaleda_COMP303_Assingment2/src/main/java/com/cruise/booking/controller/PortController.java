@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.controller;
 
 import com.cruise.booking.entity.Port;
@@ -7,6 +12,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Controller for port management operations.
+ * Handles CRUD operations for cruise ports.
+ * Manages port information including names, locations, and codes.
+ */
 @Controller
 @RequestMapping("/ports")
 public class PortController {

@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.controller;
 
 import com.cruise.booking.entity.User;
@@ -10,6 +15,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 
+/**
+ * Controller for user management operations.
+ * Handles CRUD operations for user accounts.
+ * Manages user registration, updates, and password encoding.
+ */
 @Controller
 @RequestMapping("/users")
 public class UserController {

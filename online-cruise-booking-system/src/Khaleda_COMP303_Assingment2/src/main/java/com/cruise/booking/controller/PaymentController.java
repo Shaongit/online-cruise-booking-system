@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.controller;
 
 import com.cruise.booking.entity.PaymentTransaction;
@@ -22,6 +27,11 @@ import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Controller for payment transaction management.
+ * Handles payment processing, transaction recording, and receipt generation.
+ * Includes PDF receipt generation functionality using iText library.
+ */
 @Controller
 @RequestMapping("/payments")
 public class PaymentController {

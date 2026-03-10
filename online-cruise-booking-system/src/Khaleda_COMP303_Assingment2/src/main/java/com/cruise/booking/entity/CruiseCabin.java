@@ -1,9 +1,19 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Entity class representing a Cruise Cabin in the cruise booking system.
+ * A cruise cabin represents the association between a cabin type and a specific cruise.
+ * Includes cabin-specific details like cabin number, deck, view type, and availability.
+ */
 @Entity
 @Table(name = "cruise_cabins")
 public class CruiseCabin {

@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.controller;
 
 import com.cruise.booking.entity.Passenger;
@@ -8,6 +13,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Controller for passenger management operations.
+ * Handles adding, editing, and removing passengers from bookings.
+ * Manages passenger personal information and travel documents.
+ */
 @Controller
 @RequestMapping("/passengers")
 public class PassengerController {

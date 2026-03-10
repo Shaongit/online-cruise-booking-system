@@ -1,8 +1,18 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.entity;
 
 import jakarta.persistence.*;
 import java.util.List;
 
+/**
+ * Entity class representing a Port in the cruise booking system.
+ * Ports serve as departure and arrival points for cruises.
+ * Each port has a unique code and location information.
+ */
 @Entity
 @Table(name = "ports")
 public class Port {

@@ -1,9 +1,19 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Entity class representing a User in the cruise booking system.
+ * Users can have different roles (admin, customer) and can make bookings.
+ * This class maps to the 'users' table in the database.
+ */
 @Entity
 @Table(name = "users")
 public class User {

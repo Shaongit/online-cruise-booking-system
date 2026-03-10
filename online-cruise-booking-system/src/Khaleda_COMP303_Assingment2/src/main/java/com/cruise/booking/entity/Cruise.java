@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.entity;
 
 import jakarta.persistence.*;
@@ -6,6 +11,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Entity class representing a Cruise in the cruise booking system.
+ * A cruise represents a scheduled voyage on a ship from one port to another.
+ * It includes details about dates, pricing, associated ship, and available cabins.
+ */
 @Entity
 @Table(name = "cruises")
 public class Cruise {

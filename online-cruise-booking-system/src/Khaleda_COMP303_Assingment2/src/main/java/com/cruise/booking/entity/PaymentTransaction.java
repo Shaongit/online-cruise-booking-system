@@ -1,9 +1,19 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Entity class representing a Payment Transaction in the cruise booking system.
+ * Tracks financial transactions related to bookings.
+ * Includes payment method, amount, status, and gateway reference information.
+ */
 @Entity
 @Table(name = "payment_transactions")
 public class PaymentTransaction {

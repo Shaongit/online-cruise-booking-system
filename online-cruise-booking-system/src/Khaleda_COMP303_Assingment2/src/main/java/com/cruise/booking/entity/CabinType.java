@@ -1,9 +1,19 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Entity class representing a Cabin Type in the cruise booking system.
+ * Cabin types define different categories of cabins available (e.g., Suite, Deluxe, Standard).
+ * Includes specifications like max occupancy, size, and amenities.
+ */
 @Entity
 @Table(name = "cabin_types")
 public class CabinType {

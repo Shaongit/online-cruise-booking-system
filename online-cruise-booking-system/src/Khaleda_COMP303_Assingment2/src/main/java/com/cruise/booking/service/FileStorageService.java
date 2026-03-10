@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.service;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +14,11 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.UUID;
 
+/**
+ * Service for handling file uploads and storage operations.
+ * Manages ship image uploads with unique naming and secure file handling.
+ * Files are stored in a configurable upload directory.
+ */
 @Service
 public class FileStorageService {
 

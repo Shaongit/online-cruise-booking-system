@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.service.impl;
 
 import com.cruise.booking.entity.Cruise;
@@ -9,6 +14,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of CruiseService interface.
+ * Provides business logic for managing cruise schedules and availability.
+ * Includes methods to filter cruises by status and availability dates.
+ */
 @Service
 public class CruiseServiceImpl implements CruiseService {
 

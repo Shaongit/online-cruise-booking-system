@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.service.impl;
 
 import com.cruise.booking.entity.User;
@@ -8,6 +13,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of UserService interface.
+ * Provides business logic for user management operations.
+ * Delegates data access operations to UserRepository.
+ */
 @Service
 public class UserServiceImpl implements UserService {
 

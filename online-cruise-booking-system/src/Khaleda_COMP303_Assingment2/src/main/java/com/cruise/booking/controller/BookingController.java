@@ -1,3 +1,8 @@
+/*
+ * Name: Khaleda Islam
+ * ID: 301504989
+ * Submission Date: March 10, 2026
+ */
 package com.cruise.booking.controller;
 
 import com.cruise.booking.entity.Booking;
@@ -11,6 +16,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
+/**
+ * Controller for booking management operations.
+ * Handles creating, updating, and viewing cruise bookings.
+ * Manages booking details including passengers, cabins, and pricing.
+ */
 @Controller
 @RequestMapping("/bookings")
 public class BookingController {
@@ -33,7 +45,21 @@ public class BookingController {
 
     @GetMapping
     public String list(Model model) {
-        model.addAttribute("bookings", bookingService.getAllBookings());
+        List<Booking> bookings = bookingService.getAllBookings();
+        model.addAttribute("bookings", bookings);
+        
+        // Add cancellation eligibility information for each booking
+        java.util.Map<Long, Boolean> cancellationEligibility = new java.util.HashMap<>();
+        java.util.Map<Long, Long> daysUntilDeparture = new java.util.HashMap<>();
+        
+        for (Booking booking : bookings) {
+            cancellationEligibility.put(booking.getBookingId(), bookingService.canCancelBooking(booking.getBookingId()));
+            daysUntilDeparture.put(booking.getBookingId(), bookingService.getDaysUntilDeparture(booking.getBookingId()));
+        }
+        
+        model.addAttribute("cancellationEligibility", cancellationEligibility);
+        model.addAttribute("daysUntilDeparture", daysUntilDeparture);
+        
         return "bookings/list";
     }
 
@@ -109,8 +135,30 @@ public class BookingController {
 
     @GetMapping("/{id}/cancel")
     public String cancel(@PathVariable Long id, RedirectAttributes ra) {
-        bookingService.cancelBooking(id);
-        ra.addFlashAttribute("success", "Booking cancelled.");
+        try {
+            // Check if cancellation is allowed before attempting
+            if (!bookingService.canCancelBooking(id)) {
+                long daysUntilDeparture = bookingService.getDaysUntilDeparture(id);
+                if (daysUntilDeparture < 0) {
+                    ra.addFlashAttribute("error", "Cannot cancel a booking for a cruise that has already departed.");
+                } else if (daysUntilDeparture < 10) {
+                    ra.addFlashAttribute("error", 
+                        String.format("Cancellation not allowed. You can only cancel up to 10 days before departure. " +
+                                    "Your cruise departs in %d day(s).", daysUntilDeparture));
+                } else {
+                    ra.addFlashAttribute("error", "Booking cannot be cancelled.");
+                }
+                return "redirect:/bookings";
+            }
+            
+            // Proceed with cancellation
+            bookingService.cancelBooking(id);
+            ra.addFlashAttribute("success", "Booking cancelled successfully.");
+        } catch (IllegalStateException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "An error occurred while cancelling the booking.");
+        }
         return "redirect:/bookings";
     }
 
